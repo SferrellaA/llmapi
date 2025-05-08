@@ -9,32 +9,26 @@ class Role(Enum):
 
 @dataclass
 class Message:
-    role:Role
+    role:Role|str
     content:str
 
     @classmethod
     def User(cls, content:str):
-        return cls(
-            role=Role.User, 
-            content=content
-        )
+        return cls(Role.User, content)
     
     @classmethod
     def System(cls, content:str):
-        return cls(
-            role=Role.System, 
-            content=content
-        )
+        return cls(Role.System, content)
 
     @classmethod
     def Assistant(cls, content:str):
-        return cls(
-            role=Role.Assistant, 
-            content=content
-        )
+        return cls(Role.Assistant, content)
+
+    def toDict(self)->dict[str,str]:
+        return {
+            "role": self.role if type(self.role) is str else self.role.value,
+            "content": self.content,
+        }
 
     def __str__(self):
-        return str({
-            "role": self.role.value, 
-            "content": self.content,
-        })
+        return str(self.toDict())
