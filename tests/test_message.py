@@ -1,7 +1,7 @@
-import unittest
+from unittest import TestCase
 from src.chat.message import Message, Role
 
-class TestStringMethods(unittest.TestCase):
+class TestMessageClass(TestCase):
 
     @classmethod
     def setUpClass(self):
