@@ -35,6 +35,3 @@ class TestStringMethods(unittest.TestCase):
     def test_message__str__(self):
         self.assertEqual(str(self.m), "🐡: 🥕")
         self.assertEqual(str(self.mu), "user: 🐉")
-
-if __name__ == '__main__':
-    unittest.main()
