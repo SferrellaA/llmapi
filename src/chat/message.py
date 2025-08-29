@@ -1,5 +1,5 @@
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from enum import Enum
 
 class Role(Enum):
@@ -34,7 +34,7 @@ class Message:
 
     def __iter__(self):
         return iter([
-            ("role", self.role if type(self.role) is str else self.role.value),
+            ("role", str(self.role)),
             ("content", self.content),
         ])
 
