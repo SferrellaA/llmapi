@@ -40,7 +40,7 @@ class tool:
                 if r:
                     required.append(n)
             d["parameters"] = {
-                "type": self.kind if type(self.kind) is str else str(self.kind)
+                "type": self.kind if type(self.kind) is str else str(self.kind),
                 "properties": properties,
                 "required": required,
                 "additionalProperties": False

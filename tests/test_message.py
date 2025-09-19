@@ -1,37 +1,37 @@
-from unittest import TestCase
+import pytest
 from src.chat.message import Message, Role
 
-class TestMessageClass(TestCase):
+@pytest.fixture
+def messages():
+    return {
+        "basic": Message("🐡", "🥕"),
+        "user": Message.User("🐉"),
+        "system": Message.System("👿"),
+        "developer": Message.Developer("👾"),
+        "assistant": Message.Assistant("🤖")
+    }
 
-    @classmethod
-    def setUpClass(self):
-        self.m  = Message("🐡", "🥕")
-        self.mu = Message.User("🐉")
-        self.ms = Message.System("👿")
-        self.md = Message.Developer("👾")
-        self.ma = Message.Assistant("🤖")
+def test_role_strings():
+    assert Role.System.value == "system"
+    assert Role.Developer.value == "developer"
+    assert Role.User.value == "user"
+    assert Role.Assistant.value == "assistant"
 
-    def test_role_strings(self):
-        self.assertEqual(Role.System.value, "system")
-        self.assertEqual(Role.Developer.value, "developer")
-        self.assertEqual(Role.User.value, "user")
-        self.assertEqual(Role.Assistant.value, "assistant")
+def test_message_creation(messages):  
+    assert messages["basic"].role == "🐡"
+    assert messages["basic"].content == "🥕"
 
-    def test_message_creation(self):  
-        self.assertEqual(self.m.role, "🐡")
-        self.assertEqual(self.m.content, "🥕")
+def test_message_classmethods(messages):
+    assert messages["user"].role == Role.User
+    assert messages["system"].role == Role.System
+    assert messages["developer"].role == Role.Developer
+    assert messages["assistant"].role == Role.Assistant
 
-    def test_message_classmethods(self):
-        self.assertEqual(self.mu.role, Role.User)
-        self.assertEqual(self.ms.role, Role.System)
-        self.assertEqual(self.md.role, Role.Developer)
-        self.assertEqual(self.ma.role, Role.Assistant)
+def test_message__iter__(messages):
+    d = dict(messages["basic"])
+    assert messages["basic"].role == d["role"]
+    assert messages["basic"].content == d["content"]
 
-    def test_message__iter__(self):
-        d = dict(self.m)
-        self.assertEqual(self.m.role, d["role"])
-        self.assertEqual(self.m.content, d["content"])
-
-    def test_message__str__(self):
-        self.assertEqual(str(self.m), "🐡: 🥕")
-        self.assertEqual(str(self.mu), "user: 🐉")
+def test_message__str__(messages):
+    assert str(messages["basic"]) == "🐡: 🥕"
+    assert str(messages["user"]) == "user: 🐉"
