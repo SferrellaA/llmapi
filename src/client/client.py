@@ -1,14 +1,40 @@
 import requests
 import json
+from enum import Enum
 from urllib.parse import urljoin
 from src.errors.http import HttpError
+
+class Method(Enum):
+    GET="GET"
+    POST="POST"
+    DELETE="DELETE"
+
+    @classmethod
+    def __call__(cls, method:str)->callable:
+        method_map = {
+            "GET": requests.get,
+            "POST": requests.post,
+            "PUT": requests.put,
+            "DELETE": requests.delete,
+            "PATCH": requests.patch,
+            "HEAD": requests.head,
+            "OPTIONS": requests.options
+        }
+        return method_map[method]
+        
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.value == other
+        return super().__eq__(other)
 
 class Client:
     def __init__(self,
         base_url:str,
         api_key:str="None",
         timeout:int=10, # in seconds
-        https:bool=True,
+        model:str=None, # optional
+        ca_cert_path:str=None, # path to custom CA certificate bundle
+        client_cert:str|tuple[str,str]=None, # path to .pem certificate file or (cert, key) tuple
     ):
         # To play nice with urljoin
         if "://" not in base_url:
@@ -16,27 +42,40 @@ class Client:
         if base_url[-1] != "/":
             base_url = f"{base_url}/"
 
+        # Basic api info
         self.base_url = base_url
         self.token = api_key
         self.timeout = timeout
+        self.model = model
 
-    def request(self, endpoint:str, payload:str=None):
+        # Special auth
+        self.ca_cert_path = ca_cert_path if ca_cert_path else True
+        self.client_cert = client_cert
+
+    def request(self, 
+        endpoint:str, 
+        method:Method|str=Method.GET,
+        payload:str=None
+    ):
         headers = {
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
         }
         url = urljoin(self.base_url, endpoint)
-        
+       
         try:
-            response = requests.get(
+            response = Method(method)(
                 url=url,
                 data=payload,
                 headers=headers,
-                timeout=self.timeout
+                timeout=self.timeout,
+                verify=self.ca_cert_path,
+                cert=self.client_cert
             )
             response.raise_for_status()
             return response.json()
-            
+        
+        # TODO method lookup exceptions
         except requests.exceptions.HTTPError as err:
             raise HttpError(response.status_code, response)
         except requests.exceptions.ConnectionError:
@@ -48,4 +87,4 @@ class Client:
     
     def models(self)->list[str]:
         """Return a list of models available"""
-        return [m["id"] for m in self.request("/models")["data"]]
+        return [m["id"] for m in self.request("/models", Method.GET)["data"]]
