@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
+# TODO - should I just cut this and go with strings like methods?
 class Role(Enum):
     System = "system"
     Developer = "developer"
@@ -32,17 +33,15 @@ class Message:
         return cls(Role.Assistant, content)
 
     def __iter__(self):
-        return iter([
-            ("role", str(self.role)),
-            ("content", self.content),
-        ])
+        yield ("role", self.role.value if type(self.role) is Role else self.role)
+        yield ("content", self.content)
 
     def __str__(self):
         return f"{self.role}: {self.content}"
 
+@dataclass
 class MessageHistory:
-    def __init__(self):
-        self.messages = []
+    messages:list[Message] = field(default_factory=list)
 
     def append(self, message:Message):
         self.messages.append(message)
@@ -63,7 +62,9 @@ class MessageHistory:
         return len(self.messages)
     
     def __iter__(self):
-        return iter(self.messages)
+        for message in self.messages:
+            yield dict(message)
+        #return iter(self.messages)
     
     def __getitem__(self, index:int):
         return self.messages[index]

@@ -1,5 +1,4 @@
 import pytest
-import requests
 from src.client.client import Client
 from src.errors.http import HttpError
 

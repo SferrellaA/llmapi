@@ -15,8 +15,8 @@ def test_history__iter__():
     i = iter(h)
     first = next(i)
     last = next(i)
-    assert first == Message.User("🐡")
-    assert last == Message.User("🥕")
+    assert first == dict(Message.User("🐡"))
+    assert last == dict(Message.User("🥕"))
 
 def test_history__getitem__():
     h = MessageHistory()
